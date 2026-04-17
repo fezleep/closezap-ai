@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: closezap-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=CloseZap AI
+      - DEBUG=false
+      - DATABASE_URL=postgresql://closezap:closezap@db:5432/closezap
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - FOLLOWUP_ENABLED=true
+      - FOLLOWUP_INACTIVITY_HOURS=24
+      - FOLLOWUP_CHECK_INTERVAL_MINUTES=30
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - closezap-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: closezap-db
+    environment:
+      - POSTGRES_USER=closezap
+      - POSTGRES_PASSWORD=closezap
+      - POSTGRES_DB=closezap
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U closezap"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - closezap-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: closezap-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - closezap-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  closezap-network:
+    driver: bridge
