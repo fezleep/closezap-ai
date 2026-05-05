@@ -1,311 +1,221 @@
 # CloseZap AI
 
-## Your 24/7 AI Sales Representative for WhatsApp
-
-> Stop losing leads. Start closing deals while you sleep.
+built by Felipe — evolving into a real AI-powered sales system
 
 ---
 
-## The Problem
+## Why I built this
 
-You're losing 67% of your leads because you didn't respond fast enough.
+leads don’t wait
 
-Here's what happens:
+if you don’t respond fast enough, someone else does
 
-- A lead messages you on WhatsApp at 11 PM
-- You're asleep or busy closing other deals
-- By morning, they've messaged 3 competitors
-- You just lost a $5,000 deal
+this project started from that simple observation
 
----
+i wanted to build something that could
 
-## The Solution
-
-**CloseZap AI** is your always-on AI sales assistant that:
-
-- Responds to leads in under 3 seconds
-- Builds rapport like a human sales professional
-- Qualifies leads (HOT, WARM, COLD) automatically
-- Books calls and demos while you focus on closing
-- Follows up persistently without being annoying
-- Handles 100+ conversations simultaneously
-
-Think of it as having 10 of your best sales reps working 24/7/365.
+respond instantly
+handle multiple conversations
+and never forget to follow up
 
 ---
 
-## Business Impact
+## What this is
 
-| Metric | Before CloseZap | After CloseZap |
-|--------|-----------------|----------------|
-| Lead response rate | 20% | 100% instant response |
-| Conversion rate | 2-3% | 8-12% |
-| Monthly capacity | 50 leads | Unlimited |
-| Monthly revenue | $15K | $45K+ |
+closezap is a lead management system with automation in mind
 
-### ROI Example
+it is not just a CRUD
 
-```
-100 leads/month at $3,000 average deal value
+the goal is to simulate a real sales flow
 
-WITHOUT CLOSEZAP:
-  - 20 responses → 2 conversions = $6,000
-
-WITH CLOSEZAP:
-  - 100 responses → 10 conversions = $30,000
-  
-  Net gain: +$24,000/month = $288,000/year
-```
+you receive leads
+track their status
+interact over time
+and move them through a pipeline
 
 ---
 
-## Features
+## Current state
 
-### AI-Powered Conversations
+this project is functional and actively evolving
 
-- **Personality-Driven**: Your AI "Alex" builds genuine relationships, not robotic scripts
-- **Intent Detection**: Automatically classifies leads as HOT, WARM, or COLD
-- **Natural Conversations**: Short, human responses (2-3 sentences max)
-- **Smart Follow-Ups**: Persistent but polite follow-ups until conversion or opt-out
+you can already
 
-### Lead Management Dashboard
-
-- **Real-Time Overview**: See all leads, their status, and last message at a glance
-- **One-Click Status Updates**: Move leads through New → Engaged → Closed
-- **Pipeline Stats**: Track Total, New, Engaged, and Closed leads
-
-### WhatsApp Integration
-
-- **Two-Way Messaging**: Leads text naturally, AI responds instantly
-- **Works on Your Existing Number**: No need to change your business number
-- **Global Support**: Works in 100+ countries
+create leads
+list leads
+update their lifecycle
+and visualize everything in a simple dashboard
 
 ---
 
-## Technology Stack
+## Backend
 
-| Layer | Technology |
-|-------|------------|
-| Backend | FastAPI (Python) + SQLite/PostgreSQL |
-| Frontend | React 18 + Vite + TailwindCSS |
-| AI | OpenAI GPT-4 (configurable) |
-| Messaging | Twilio WhatsApp API |
+built with fastapi
+
+provides a clean and simple API
+
+you can
+
+create leads
+retrieve leads
+close leads
+
+data is stored in sqlite for simplicity
+the structure is ready to scale to other databases
 
 ---
 
-## Quick Start
+## Automation
 
-### Prerequisites
+there is a background scheduler running
 
-- Python 3.10+
-- Node.js 18+
-- npm or yarn
+it was designed to handle follow-ups automatically
 
-### 1. Clone and Setup Backend
+this part is still evolving, but the foundation is already there
+
+---
+
+## Frontend
+
+built with react and vite
+
+focused on clarity
+
+you can
+
+see all leads
+understand their status
+and follow interactions
+
+no unnecessary complexity
+
+---
+
+## Tech stack
+
+backend
+fastapi (python)
+
+frontend
+react + vite
+
+database
+sqlite
+
+planned
+openai
+whatsapp integration
+
+---
+
+## Running locally
+
+### backend
 
 ```bash
-cd closezap-ai/backend
-
-# Create virtual environment
+cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+venv\Scripts\activate
 
-# Install dependencies
 pip install -r requirements.txt
-
-# Seed sample data (10 demo leads)
-python scripts/seed_data.py
-
-# Start the server
 python run.py
 ```
 
-Backend will be available at: `http://localhost:8000`
+api
 
-### 2. Setup Frontend
+http://localhost:8000
+
+docs
+
+http://localhost:8000/docs
+
+---
+
+### frontend
 
 ```bash
-# Open a new terminal
-cd closezap-ai/frontend
-
-# Install dependencies
+cd frontend
 npm install
-
-# Start dev server
 npm run dev
 ```
 
-Frontend will be available at: `http://localhost:3000`
+app
 
-### 3. View the Dashboard
-
-Open your browser and navigate to **http://localhost:3000**
-
-You will see:
-- Dashboard with 10 sample leads
-- Real-time stats (New, Engaged, Closed)
-- Click any status to update it
-- View last messages and contact times
+http://localhost:3000
 
 ---
 
-## Demo
+## Example request
 
-### Dashboard Preview
+creating a lead
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  CloseZap AI                              April 19, 2026    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │
-│  │ Total   │  │ New     │  │ Engaged │  │ Closed  │       │
-│  │   10    │  │    4    │  │    4    │  │    2    │       │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘       │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  Leads Dashboard                              [Refresh]│
-│  ├─────────────────────────────────────────────────────┤   │
-│  │  Name          Phone         Status    Last Message  │   │
-│  │  John S.       +1234567890   [New]     "Hi! I saw"   │   │
-│  │  Sarah J.      +1234567891   [Engaged] "What's..."   │   │
-│  │  Mike C.       +1234567892   [Engaged] "Can your"    │   │
-│  │  Emily D.      +1234567893   [Closed]  "Perfect!"    │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+```json
+POST /api/leads
+
+{
+  "name": "Test Lead",
+  "phone": "11999999999",
+  "interest": "Automation",
+  "status": "new",
+  "intent": "hot"
+}
 ```
 
 ---
 
-## API Endpoints
+## Project structure
 
-```bash
-# Get all leads
-GET /api/leads
+backend
 
-# Get a specific lead
-GET /api/leads/{id}
+app
+routes
+services
+models
 
-# Update lead (status, intent, etc.)
-PATCH /api/leads/{id}
+frontend
 
-# Get HOT leads (ready to buy)
-GET /api/leads/hot
-
-# Close a lead (converted)
-POST /api/leads/{id}/close
-
-# Delete a lead
-DELETE /api/leads/{id}
-```
-
-Full API documentation available at: `http://localhost:8000/docs`
+src
+components
+services
 
 ---
 
-## Configuration
+## What i am building towards
 
-### Environment Variables
+this is not meant to stay a demo
 
-Create a `.env` file in the `backend/` directory:
+the idea is to evolve this into something closer to a real product
 
-```env
-# Application
-APP_NAME="CloseZap AI"
-DEBUG=true
-SECRET_KEY=your-secret-key-here
+next steps include
 
-# Database
-DATABASE_URL=sqlite:///./closezap.db
-
-# OpenAI (for AI conversations)
-OPENAI_API_KEY=sk-...
-
-# Twilio (for WhatsApp)
-TWILIO_ACCOUNT_SID=AC...
-TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=+1234567890
-```
+ai-generated responses
+lead qualification
+whatsapp integration
+better user experience
+deployment
 
 ---
 
-## Project Structure
+## About me
 
-```
-closezap-ai/
-├── backend/
-│   ├── app/
-│   │   ├── main.py           # FastAPI application
-│   │   ├── routes/
-│   │   │   └── leads.py      # Lead management endpoints
-│   │   ├── models/
-│   │   │   └── lead.py       # Lead database model
-│   │   └── services/
-│   │       ├── lead_service.py       # Lead operations
-│   │       ├── ai_service.py         # AI conversations
-│   │       └── followup_service.py   # Automated follow-ups
-│   ├── scripts/
-│   │   └── seed_data.py      # Sample data seeder
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Dashboard.jsx       # Main dashboard page
-│   │   │   ├── LeadsTable.jsx      # Leads table component
-│   │   │   └── StatusDropdown.jsx  # Status update dropdown
-│   │   ├── hooks/
-│   │   │   └── useLeads.js         # Data fetching hook
-│   │   └── services/
-│   │       └── leads.js            # API service layer
-│   └── package.json
-│
-└── README.md
-```
+i’m Felipe
+
+i build systems to learn by doing
+
+this project is part of my focus on
+
+backend architecture
+automation
+ai-driven products
 
 ---
 
-## Roadmap
+## Final note
 
-### Q2 2026
+this project is not finished
 
-- [x] Leads Dashboard
-- [x] AI Conversations
-- [x] Intent Classification
-- [ ] WhatsApp Integration
-- [ ] Voice Call Integration
+and that is intentional
 
-### Q3 2026
+it is being improved step by step
 
-- [ ] Multi-channel support (SMS, Instagram, Facebook)
-- [ ] Analytics Dashboard
-- [ ] Team Collaboration
-- [ ] Custom AI Personas
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-MIT License
-
----
-
-## Built With
-
-- Python + FastAPI
-- React 18
-- TailwindCSS
-
----
-
-**Ready to close more deals?** Start with the demo above and see CloseZap AI in action.
+with the goal of becoming something that could actually be used in a real scenario
