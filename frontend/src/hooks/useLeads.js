@@ -19,20 +19,35 @@ export function useLeads() {
     }
   }, []);
 
-  const updateLeadStatus = useCallback(async (id, status) => {
-    try {
-      await leadsService.updateStatus(id, status);
-      setLeads(prev => prev.map(lead =>
-        lead.id === id ? { ...lead, status } : lead
-      ));
-    } catch (err) {
-      throw err;
-    }
+  const createLead = useCallback(async (payload) => {
+    const createdLead = await leadsService.create(payload);
+    setLeads((prev) => [
+      { ...createdLead, _highlight: true },
+      ...prev,
+    ]);
+    return createdLead;
+  }, []);
+
+  const closeLead = useCallback(async (id) => {
+    const updatedLead = await leadsService.close(id);
+
+    setLeads((prev) =>
+      prev.map((lead) => (lead.id === id ? updatedLead : lead))
+    );
+
+    return updatedLead;
   }, []);
 
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
 
-  return { leads, loading, error, fetchLeads, updateLeadStatus };
+  return {
+    leads,
+    loading,
+    error,
+    fetchLeads,
+    createLead,
+    closeLead,
+  };
 }

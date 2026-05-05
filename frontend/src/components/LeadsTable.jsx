@@ -1,94 +1,117 @@
-import { StatusDropdown } from './StatusDropdown';
-
-export function LeadsTable({ leads, onUpdateStatus }) {
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const truncateMessage = (message, maxLength = 50) => {
+export function LeadsTable({ leads, onCloseLead }) {
+  const truncateMessage = (message, maxLength = 55) => {
     if (!message) return '-';
     if (message.length <= maxLength) return message;
     return message.substring(0, maxLength) + '...';
   };
 
+  const getStatusBadge = (status) => {
+    const styles = {
+      new: 'border-white/15 text-zinc-300 bg-white/5',
+      engaged: 'border-[#d4af37]/30 text-[#d4af37] bg-[#d4af37]/10',
+      closed: 'border-white/10 text-white bg-white/10',
+    };
+
+    return (
+      <span
+        className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${
+          styles[status] || 'border-white/10 text-zinc-400 bg-white/5'
+        }`}
+      >
+        {status}
+      </span>
+    );
+  };
+
+  const getIntentText = (intent) => {
+    const styles = {
+      hot: 'text-[#d4af37]',
+      warm: 'text-zinc-300',
+      cold: 'text-zinc-500',
+    };
+
+    return (
+      <span className={`text-sm font-medium ${styles[intent] || 'text-zinc-500'}`}>
+        {intent || '-'}
+      </span>
+    );
+  };
+
+  const handleClose = async (id) => {
+    try {
+      await onCloseLead(id);
+    } catch (error) {
+      console.error('error closing lead', error);
+    }
+  };
+
   if (!leads || leads.length === 0) {
     return (
-      <div className="text-center py-12">
-        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No leads</h3>
-        <p className="mt-1 text-sm text-gray-500">Get started by adding new leads.</p>
+      <div className="py-16 text-center">
+        <h3 className="text-sm font-medium text-white">no leads yet</h3>
+        <p className="mt-2 text-sm text-zinc-500">
+          create a lead to start testing the flow
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-hidden rounded-2xl border border-white/10">
+      <table className="min-w-full divide-y divide-white/10">
+        <thead className="bg-black/20">
           <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Phone
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Last Message
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Last Contact
-            </th>
+            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">lead</th>
+            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">interest</th>
+            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">status</th>
+            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">intent</th>
+            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">last message</th>
+            <th className="px-5 py-4 text-right text-xs font-medium uppercase tracking-wider text-zinc-500">action</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+
+        <tbody className="divide-y divide-white/10 bg-[#111111]">
           {leads.map((lead) => (
-            <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-primary-700 font-medium text-sm">
-                      {lead.name ? lead.name.charAt(0).toUpperCase() : '?'}
-                    </span>
+            <tr
+              key={lead.id}
+              className={`transition ${
+                lead._highlight
+                  ? 'bg-[#d4af37]/10'
+                  : 'hover:bg-white/[0.03]'
+              }`}
+            >
+              <td className="px-5 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d4af37]/40 bg-black text-[#d4af37] font-semibold">
+                    {lead.name ? lead.name.charAt(0).toUpperCase() : '?'}
                   </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {lead.name || 'Unnamed Lead'}
-                    </div>
-                    {lead.email && (
-                      <div className="text-sm text-gray-500">{lead.email}</div>
-                    )}
+
+                  <div>
+                    <p className="font-medium text-white">{lead.name || 'Unnamed lead'}</p>
+                    <p className="text-sm text-zinc-500">{lead.phone}</p>
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{lead.phone}</div>
+
+              <td className="px-5 py-5 text-sm text-zinc-300">{lead.interest || '-'}</td>
+              <td className="px-5 py-5">{getStatusBadge(lead.status)}</td>
+              <td className="px-5 py-5">{getIntentText(lead.intent)}</td>
+
+              <td className="max-w-xs px-5 py-5 text-sm text-zinc-500">
+                {truncateMessage(lead.lastMessage || lead.last_message)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <StatusDropdown
-                  leadId={lead.id}
-                  currentStatus={lead.status}
-                  onUpdate={onUpdateStatus}
-                />
-              </td>
-              <td className="px-6 py-4">
-                <div className="text-sm text-gray-900 max-w-xs truncate" title={lead.lastMessage}>
-                  {truncateMessage(lead.lastMessage)}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(lead.lastContactAt)}
+
+              <td className="px-5 py-5 text-right">
+                {lead.status !== 'closed' ? (
+                  <button
+                    onClick={() => handleClose(lead.id)}
+                    className="rounded-xl border border-[#d4af37]/40 px-4 py-2 text-sm font-medium text-[#d4af37] hover:bg-[#d4af37] hover:text-black transition"
+                  >
+                    closing...
+                  </button>
+                ) : (
+                  <span className="text-sm text-zinc-500">closed</span>
+                )}
               </td>
             </tr>
           ))}
