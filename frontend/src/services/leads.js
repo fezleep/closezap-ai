@@ -1,6 +1,27 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = "http://localhost:8000/api";
 
-// Map frontend status to backend status
+export async function getLeads() {
+  const response = await fetch(`${API_BASE_URL}/leads`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch leads");
+  }
+
+  return response.json();
+}
+
+export async function closeLead(leadId) {
+  const response = await fetch(`${API_BASE_URL}/leads/${leadId}/close`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to close lead");
+  }
+
+  return response.json();
+}
+
 const STATUS_MAP = {
   'new': 'new',
   'contacted': 'engaged',
