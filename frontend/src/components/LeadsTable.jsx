@@ -140,13 +140,24 @@ return (
             {aiReply.text}
           </p>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-between items-center">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(aiReply.text);
+              }}
+              className="px-4 py-2 text-sm text-[#d4af37] border border-[#d4af37]/40 rounded-lg hover:bg-[#d4af37] hover:text-black transition"
+            >
+              copy
+            </button>
+
+            
             <button
               onClick={() => setAiReply(null)}
               className="px-4 py-2 text-sm text-zinc-400"
             >
               close
             </button>
+            
           </div>
 
         </div>
