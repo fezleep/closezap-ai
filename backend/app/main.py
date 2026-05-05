@@ -7,7 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.database import engine, Base
 from app.routes import api_router
+from app.routes import leads
 from app.services.followup_service import followup_service
+
+
 
 # Configure logging
 logging.basicConfig(
@@ -20,6 +23,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
 
 
 @asynccontextmanager
@@ -68,7 +72,6 @@ app.add_middleware(
 
 # Include API routes
 app.include_router(api_router, prefix="/api")
-
 
 @app.get("/")
 async def root():

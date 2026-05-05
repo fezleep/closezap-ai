@@ -1,15 +1,57 @@
 """Lead management routes"""
 import logging
 from typing import List, Optional
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.models.lead import Lead, LeadStatus, LeadIntent, LeadResponse, LeadUpdate, LeadIntentAnalysis
 from app.services.lead_service import LeadService
 from app.services.ai_service import AIService
 
 logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+
+class LeadCreate(BaseModel):
+    name: Optional[str] = None
+    phone: str
+    interest: Optional[str] = None
+    status: str = "new"
+    intent: str = "cold"
+
+
+@router.post("/", response_model=dict)
+def create_lead(data: LeadCreate, db: Session = Depends(get_db)):
+    lead = Lead(
+        name=data.name,
+        phone=data.phone,
+        interest=data.interest,
+        status=data.status,
+        intent=data.intent,
+        created_at=datetime.utcnow(),
+        conversation_count=0
+    )
+
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+
+    return {
+        "id": lead.id,
+        "name": lead.name,
+        "phone": lead.phone,
+        "interest": lead.interest,
+        "status": lead.status,
+        "intent": lead.intent,
+        "last_message": lead.last_message,
+        "conversation_count": lead.conversation_count,
+        "created_at": lead.created_at,
+    }
 
 
 @router.get("", response_model=List[LeadResponse])
