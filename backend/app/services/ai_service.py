@@ -2,146 +2,82 @@
 import logging
 import re
 from typing import Optional, List, Tuple
-from openai import AsyncOpenAI
 from app.core.config import settings
 from app.models.lead import Lead, LeadStatus
+from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
 
 class AIService:
-    """Service for generating AI responses using OpenAI"""
-
-    # Intent classification keywords
     HOT_KEYWORDS = [
         "buy", "purchase", "price", "cost", "pricing", "ready", "soon",
         "sign", "contract", "today", "tomorrow", "asap", "urgent",
         "budget", "approve", "decision", "now", "immediately"
     ]
+
     WARM_KEYWORDS = [
         "interested", "questions", "more info", "tell me", "how does",
         "compare", "demo", "trial", "meeting", "call", "discuss",
         "considering", "looking", "thinking", "maybe"
     ]
+
     COLD_KEYWORDS = [
         "just looking", "browsing", "curious", "not sure", "maybe later",
         "no rush", "just checking", "not interested", "pass", "unsubscribe"
     ]
 
+
     def __init__(self):
-        """Initialize OpenAI client"""
         if not settings.openai_api_key:
-            logger.warning("OpenAI API key not configured. AI responses will be fallback messages.")
+            logger.warning("OpenAI API key not configured.")
             self.client = None
         else:
             self.client = AsyncOpenAI(api_key=settings.openai_api_key)
+
         self.system_prompt = settings.ai_system_prompt
 
-    async def generate_response(
-        self,
-        lead: Lead,
-        user_message: str,
-        conversation_history: Optional[List[dict]] = None
-    ) -> str:
-        """
-        Generate an AI response based on the lead's context and message.
-
-        Args:
-            lead: The lead object containing context
-            user_message: The message from the user
-            conversation_history: Previous messages in the conversation
-
-        Returns:
-            AI-generated response string
-        """
+    async def generate_response(self, lead, user_message, conversation_history=None):
         if not self.client:
-            logger.warning("OpenAI client not available, returning fallback response")
             return self._get_fallback_response(lead, user_message)
 
         try:
-            # Detect intent from message
             intent = self._detect_intent(user_message)
-
-            # Build context about the lead
             lead_context = self._build_lead_context(lead)
             intent_context = self._get_intent_context(intent, lead)
 
-            # Build messages for the API call
             messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "system", "content": f"Lead Context:\n{lead_context}"},
-                {"role": "system", "content": f"Intent Analysis:\n{intent_context}"},
-            ]
+                {
+                    "role": "system",
+                    "content": self.system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+    Lead Context:
+    {lead_context}
 
-            # Add conversation history if provided
-            if conversation_history:
-                for msg in conversation_history[-10:]:  # Last 10 messages
-                    messages.append(msg)
+    Intent Analysis:
+    {intent_context}
 
-            # Add the user's message
-            messages.append({"role": "user", "content": user_message})
-
-            # Call OpenAI API
-            response = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                max_tokens=500,
-                temperature=0.7,
-                presence_penalty=0.6,
-                frequency_penalty=0.5,
-            )
-
-            ai_response = response.choices[0].message.content.strip()
-            logger.info(f"Generated AI response for lead {lead.id} (intent: {intent})")
-
-            return ai_response
-
-        except Exception as e:
-            logger.error(f"Error generating AI response: {e}", exc_info=True)
-            return self._get_fallback_response(lead, user_message)
-
-    async def generate_followup_message(self, lead: Lead) -> str:
-        """
-        Generate a follow-up message for an inactive lead.
-
-        Args:
-            lead: The lead to follow up with
-
-        Returns:
-            Follow-up message string
-        """
-        if not self.client:
-            return self._get_followup_fallback(lead)
-
-        try:
-            lead_context = self._build_lead_context(lead)
-            intent_hint = "HOT leads are ready to buy - push for a call/demo. WARM leads need nurturing - offer value. COLD leads need gentle check-ins."
-
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "system", "content": f"Lead Context:\n{lead_context}"},
-                {"role": "system", "content": f"Guidance: {intent_hint}"},
-                {"role": "system", "content": (
-                    "The lead has been inactive for a while. "
-                    "Generate a friendly, non-pushy follow-up message to re-engage them. "
-                    "Reference their interest if known, ask about their timeline, and offer value. "
-                    "Keep it brief, conversational, and end with a question. "
-                    "Match the tone to their interest level."
-                )},
+    User Message:
+    {user_message}
+    """
+                }
             ]
 
             response = await self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
                 max_tokens=200,
-                temperature=0.8,
+                temperature=0.7
             )
 
             return response.choices[0].message.content.strip()
 
         except Exception as e:
-            logger.error(f"Error generating follow-up message: {e}", exc_info=True)
-            return self._get_followup_fallback(lead)
+            logger.error(f"Error generating AI response: {e}")
+            return self._get_fallback_response(lead, user_message)
 
     async def analyze_lead_intent(self, lead: Lead, message: str) -> dict:
         """

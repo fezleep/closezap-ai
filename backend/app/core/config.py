@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite:///./closezap.db"
 
-    # OpenAI
-    openai_api_key: Optional[str] = None
-
+    # AI Keys
+    openai_api_key: str | None = None
+    google_api_key: str | None = None
     # Twilio
     twilio_account_sid: Optional[str] = None
     twilio_auth_token: Optional[str] = None

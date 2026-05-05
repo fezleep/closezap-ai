@@ -279,3 +279,30 @@ async def delete_lead(
     except Exception as e:
         logger.error(f"Error deleting lead {lead_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error deleting lead")
+    
+    from fastapi import HTTPException
+from app.services.ai_service import AIService
+
+ai_service = AIService()
+
+
+@router.post("/{lead_id}/reply")
+async def generate_reply(lead_id: int, message: dict, db: Session = Depends(get_db)):
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+
+    if not lead:
+        raise HTTPException(status_code=404, detail="lead not found")
+
+    user_message = message.get("message")
+
+    if not user_message:
+        raise HTTPException(status_code=400, detail="message is required")
+
+    ai_response = await ai_service.generate_response(
+        lead=lead,
+        user_message=user_message
+    )
+
+    return {
+        "reply": ai_response
+    }

@@ -52,3 +52,19 @@ export const leadsService = {
 export async function closeLead(leadId) {
   return leadsService.close(leadId);
 }
+
+export async function generateReply(leadId, message) {
+  const response = await fetch(`${API_BASE_URL}/leads/${leadId}/reply`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate reply");
+  }
+
+  return response.json();
+}

@@ -1,4 +1,11 @@
+import { closeLead, generateReply } from '../services/leads';
+import { useState } from 'react';
+
 export function LeadsTable({ leads, onCloseLead }) {
+
+  const [aiReply, setAiReply] = useState(null);
+  const [loadingReply, setLoadingReply] = useState(false);
+
   const truncateMessage = (message, maxLength = 55) => {
     if (!message) return '-';
     if (message.length <= maxLength) return message;
@@ -56,67 +63,96 @@ export function LeadsTable({ leads, onCloseLead }) {
     );
   }
 
-  return (
+  const handleGenerateReply = async (lead) => {
+  try {
+    setLoadingReply(true);
+
+    const data = await generateReply(
+      lead.id,
+      lead.lastMessage || "hello"
+    );
+
+    setAiReply({
+      leadName: lead.name,
+      text: data.reply
+    });
+
+  } catch (error) {
+    console.error("error generating reply", error);
+  } finally {
+    setLoadingReply(false);
+  }
+};
+
+return (
+  <>
     <div className="overflow-hidden rounded-2xl border border-white/10">
       <table className="min-w-full divide-y divide-white/10">
         <thead className="bg-black/20">
           <tr>
-            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">lead</th>
-            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">interest</th>
-            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">status</th>
-            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">intent</th>
-            <th className="px-5 py-4 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">last message</th>
-            <th className="px-5 py-4 text-right text-xs font-medium uppercase tracking-wider text-zinc-500">action</th>
+            <th className="px-5 py-4 text-left text-xs text-zinc-500">lead</th>
+            <th className="px-5 py-4 text-left text-xs text-zinc-500">interest</th>
+            <th className="px-5 py-4 text-left text-xs text-zinc-500">status</th>
+            <th className="px-5 py-4 text-left text-xs text-zinc-500">intent</th>
+            <th className="px-5 py-4 text-left text-xs text-zinc-500">last message</th>
+            <th className="px-5 py-4 text-right text-xs text-zinc-500">action</th>
           </tr>
         </thead>
 
         <tbody className="divide-y divide-white/10 bg-[#111111]">
           {leads.map((lead) => (
-            <tr
-              key={lead.id}
-              className={`transition ${
-                lead._highlight
-                  ? 'bg-[#d4af37]/10'
-                  : 'hover:bg-white/[0.03]'
-              }`}
-            >
+            <tr key={lead.id}>
+              <td className="px-5 py-5">{lead.name}</td>
+
+              <td className="px-5 py-5">{lead.interest}</td>
+
+              <td className="px-5 py-5">{lead.status}</td>
+
+              <td className="px-5 py-5">{lead.intent}</td>
+
               <td className="px-5 py-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d4af37]/40 bg-black text-[#d4af37] font-semibold">
-                    {lead.name ? lead.name.charAt(0).toUpperCase() : '?'}
-                  </div>
-
-                  <div>
-                    <p className="font-medium text-white">{lead.name || 'Unnamed lead'}</p>
-                    <p className="text-sm text-zinc-500">{lead.phone}</p>
-                  </div>
-                </div>
-              </td>
-
-              <td className="px-5 py-5 text-sm text-zinc-300">{lead.interest || '-'}</td>
-              <td className="px-5 py-5">{getStatusBadge(lead.status)}</td>
-              <td className="px-5 py-5">{getIntentText(lead.intent)}</td>
-
-              <td className="max-w-xs px-5 py-5 text-sm text-zinc-500">
-                {truncateMessage(lead.lastMessage || lead.last_message)}
+                {lead.lastMessage || '-'}
               </td>
 
               <td className="px-5 py-5 text-right">
-                {lead.status !== 'closed' ? (
-                  <button
-                    onClick={() => handleClose(lead.id)}
-                    className="rounded-xl border border-[#d4af37]/40 px-4 py-2 text-sm font-medium text-[#d4af37] hover:bg-[#d4af37] hover:text-black transition"
-                  >
-                    closing...
-                  </button>
-                ) : (
-                  <span className="text-sm text-zinc-500">closed</span>
-                )}
+                <button
+                  onClick={() => handleGenerateReply(lead)}
+                  className="ml-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-white hover:bg-white/10"
+                >
+                  ai reply
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  );
+
+    {aiReply && (
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div className="w-full max-w-lg rounded-2xl bg-[#111111] border border-white/10 p-6">
+
+          <h2 className="text-lg font-semibold text-white">
+            ai reply for {aiReply.leadName}
+          </h2>
+
+          <p className="mt-4 text-sm text-zinc-300">
+            {aiReply.text}
+          </p>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => setAiReply(null)}
+              className="px-4 py-2 text-sm text-zinc-400"
+            >
+              close
+            </button>
+          </div>
+
+        </div>
+      </div>
+    )}
+
+  </>
+);  
 }
