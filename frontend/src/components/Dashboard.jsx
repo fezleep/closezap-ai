@@ -105,7 +105,7 @@ export function Dashboard() {
             </button>
 
             <a
-              href="http://localhost:8000/docs"
+              href={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/docs`}
               target="_blank"
               className="rounded-xl border border-white/10 px-5 py-2 text-sm text-zinc-300 hover:bg-white/5 transition"
             >
